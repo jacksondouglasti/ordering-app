@@ -1,3 +1,4 @@
+import { ProductDTO } from './../../models/product.dto';
 import { CartService } from './../../services/domain/cart.service';
 import { API_CONFIG } from './../../config/api.config';
 import { ProductService } from './../../services/domain/product.service';
@@ -36,6 +37,26 @@ export class CartPage {
       },
       error => {});
     }
+  }
+
+  removeItem(product: ProductDTO) {
+    this.items = this.cartService.removeProduct(product).items;
+  }
+
+  increaseAmount(product: ProductDTO) {
+    this.items = this.cartService.increaseAmount(product).items;
+  }
+
+  decreaseAmount(product: ProductDTO) {
+    this.items = this.cartService.decreaseAmount(product).items;
+  }
+
+  total() : number {
+    return this.cartService.total();
+  }
+
+  goOn() {
+    this.navCtrl.setRoot('CategoriesPage');
   }
 
 }
