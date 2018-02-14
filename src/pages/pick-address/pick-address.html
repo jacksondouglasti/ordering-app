@@ -1,0 +1,22 @@
+<ion-header>
+  <button ion-button menuToggle>
+    <ion-icon name="menu"></ion-icon>
+  </button>
+  <ion-navbar>
+    <ion-title>Address</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+  <ion-list>
+    <ion-list-header>
+      Choose your address
+    </ion-list-header>
+    <button ion-item *ngFor="let item of items">
+      <h2>{{ item.street }}, {{ item.number }}</h2>
+      <p>{{ item.neighborhood }} CEP {{ item.zipcode }}</p>
+      <p>{{ item.city.name }}, {{ item.city.state.name }}</p>
+    </button>
+  </ion-list>
+</ion-content>
