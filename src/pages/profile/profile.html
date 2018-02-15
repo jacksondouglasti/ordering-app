@@ -15,4 +15,19 @@
   </ion-avatar>
   <h2 text-center>{{ client?.name }}</h2>
   <p text-center>{{ client?.email }}</p>
+
+  <ion-card>
+    <ion-card-header>
+      Send profile image
+    </ion-card-header>
+    <ion-item *ngIf="picture">
+      <img [src]="picture">
+    </ion-item>
+    <ion-item>
+      <button ion-button block (click)="getCameraPicture()" [disabled]="cameraOn">Camera</button>
+      <button *ngIf="picture" ion-button outline block (click)="sendPicture()">Send image</button>
+      <button *ngIf="picture" ion-button outline block (click)="cancel()">Discart image</button>
+    </ion-item>
+  </ion-card>
+
 </ion-content>
