@@ -2,7 +2,7 @@ import { API_CONFIG } from './../../config/api.config';
 import { ProductDTO } from './../../models/product.dto';
 import { ProductService } from './../../services/domain/product.service';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 
 @IonicPage()
 @Component({
@@ -11,39 +11,74 @@ import { IonicPage, NavController, NavParams } from 'ionic-angular';
 })
 export class ProductsPage {
 
-  items: ProductDTO[];
+  items: ProductDTO[] = [];
+  page: number = 0;
 
   constructor(
-    public navCtrl: NavController, 
+    public navCtrl: NavController,
     public navParams: NavParams,
-    public productService: ProductService) {
+    public productService: ProductService,
+    public loadingController: LoadingController) {
   }
 
   ionViewDidLoad() {
+    this.loadData();
+  }
+
+  loadData() {
     let categoryId = this.navParams.get('categoryId');
-    this.productService.findByCategories(categoryId)
+    let loader = this.presentLoading();
+
+    this.productService.findByCategories(categoryId, this.page, 10)
       .subscribe(response => {
-        this.items = response['content'];
-        this.loadImageUrls();
+        let start = this.items.length;
+        this.items = this.items.concat(response['content']);
+        loader.dismiss();
+        this.loadImageUrls(start, this.items.length - 1);
       },
-      error => {});
-    }
-    
-    ionvi
-    
-  loadImageUrls() {
-    for(var i = 0; i < this.items.length; i++) {
+        error => {
+          loader.dismiss();
+        });
+  }
+
+  loadImageUrls(start: number, end: number) {
+    for (var i = start; i < end; i++) {
       let item = this.items[i];
       this.productService.getSmallImageFromBucket(item.id)
-      .subscribe(response => {
-        item.imageUrl = `${API_CONFIG.bucketBaseUrl}/prod${item.id}-small.jpg`;
-      },
-      error => {});
+        .subscribe(response => {
+          item.imageUrl = `${API_CONFIG.bucketBaseUrl}/prod${item.id}-small.jpg`;
+        },
+          error => { });
     }
   }
 
   showDetail(productId: string) {
-    this.navCtrl.push('ProductDetailPage', {productId: productId});
+    this.navCtrl.push('ProductDetailPage', { productId: productId });
   }
 
+  presentLoading() {
+    let loader = this.loadingController.create({
+      content: "Loading"
+    });
+    loader.present();
+    return loader;
+  }
+
+  doRefresh(refresher) {
+    this.page = 0;
+    this.items = [];
+    this.loadData();
+    setTimeout(() => {
+      refresher.complete();
+    }, 1000);
+  }
+
+  doInfinite(infiniteScroll) {
+    this.page++;
+
+    setTimeout(() => {
+      this.loadData();
+      infiniteScroll.complete();
+    }, 1000);
+  }
 }

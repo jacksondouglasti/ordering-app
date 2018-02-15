@@ -43,4 +43,5 @@ export class ProductDetailPage {
     this.cartService.addProduct(product);
     this.navCtrl.setRoot('CartPage');
   }
+
 }
