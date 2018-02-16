@@ -25,19 +25,17 @@ export class HomePage {
 
   ionViewWillEnter(){
    this.menu.swipeEnable(false);
-  }
-
-  ionViewDidLeave(){
-   this.menu.swipeEnable(true);
-  }
-
-  ionViewDidEnter(){
-    this.auth.refreshToken()
+   
+   this.auth.refreshToken()
     .subscribe(response => {
       this.auth.successfullLogin(response.headers.get('Authorization'));
       this.navCtrl.setRoot('CategoriesPage');
     },
     error => {});
+  }
+
+  ionViewDidLeave(){
+   this.menu.swipeEnable(true);
   }
 
   login() {

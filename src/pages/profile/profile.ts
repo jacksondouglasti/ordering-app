@@ -1,7 +1,7 @@
 import { API_CONFIG } from './../../config/api.config';
 import { StorageService } from './../../services/storage.service';
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, LoadingController } from 'ionic-angular';
 import { ClientDTO } from '../../models/client.dto';
 import { ClientService } from '../../services/domain/client.service';
 import { CameraOptions, Camera } from '@ionic-native/camera';
@@ -22,7 +22,8 @@ export class ProfilePage {
     public navParams: NavParams,
     public storage: StorageService,
     public clientService: ClientService,
-    public camera: Camera) {
+    public camera: Camera,
+    public loadingController: LoadingController) {
   }
 
   ionViewDidLoad() {
@@ -52,7 +53,7 @@ export class ProfilePage {
   getImageIfExists() {
     this.clientService.getImageFromBucket(this.client.id)
       .subscribe(response => {
-        this.client.imageUrl = `${API_CONFIG.bucketBaseUrl}/cp${this.client.id}.jpg`;
+        this.client.imageUrl = `${API_CONFIG.bucketBaseUrl}/cp${this.client.id}.jpg?time=${new Date().getTime()}`;
       },
       error => {}
     );
@@ -72,15 +73,48 @@ export class ProfilePage {
      this.picture = 'data:image/jpeg;base64,' + imageData;
      this.cameraOn = false;
     }, (err) => {
+      setTimeout(() => {
+        this.cameraOn = false
+      }, 1500);
+    });
+  }
+
+  getGalleryPicture() {
+    this.cameraOn = true;
+
+    const options: CameraOptions = {
+      quality: 100,
+      sourceType: this.camera.PictureSourceType.PHOTOLIBRARY,
+      destinationType: this.camera.DestinationType.DATA_URL,
+      encodingType: this.camera.EncodingType.PNG,
+      mediaType: this.camera.MediaType.PICTURE
+    }
+    
+    this.camera.getPicture(options).then((imageData) => {
+     this.picture = 'data:image/jpeg;base64,' + imageData;
+     this.cameraOn = false;
+    }, (err) => {
     });
   }
 
   sendPicture() {
+    let loader = this.presentLoading();
     this.clientService.uploadPicture(this.picture)
       .subscribe(response => {
+        loader.dismiss();
         this.picture = null;
         this.loadData();
-      }, error => {})
+      }, error => {
+        loader.dismiss();
+      })
+  }
+
+  presentLoading() {
+    let loader = this.loadingController.create({
+      content: "Uploading"
+    });
+    loader.present();
+    return loader;
   }
 
   cancel() {
